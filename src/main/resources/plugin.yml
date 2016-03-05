@@ -1,0 +1,7 @@
+name: SamaTest
+main: com.github.keyzou.samatest.Main
+version: 1.0-SNAPSHOT
+commands:
+    test:
+        description: test
+        usage: /<command>
