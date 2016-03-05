@@ -1,5 +1,13 @@
 package com.github.keyzou.samatest;
 
-public class Main {
-    // test 3
+import org.bukkit.plugin.java.JavaPlugin;
+
+public class Main extends JavaPlugin {
+
+    @Override
+    public void onEnable(){
+        getLogger().info("Ca marche");
+    }
+
+
 }
