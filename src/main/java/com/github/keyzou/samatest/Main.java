@@ -49,7 +49,7 @@ public class Main extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e){
-        e.getPlayer().setGameMode(GameMode.ADVENTURE);
+        e.getPlayer().setGameMode(GameMode.CREATIVE);
         waitingList.add(e.getPlayer());
     }
 }
