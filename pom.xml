@@ -30,6 +30,8 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
-
+    <build>
+        <directory>${dir}</directory>
+    </build>
 
 </project>
