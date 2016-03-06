@@ -2,6 +2,7 @@ package com.github.keyzou.samatest;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -33,10 +34,14 @@ public class Room {
             Location spawn = firstSpawn.add(0, 0, 2);
             villagerSpawns.add(spawn);
             new Location(spawn.getWorld(), spawn.getBlockX(), spawn.getBlockY()-1, spawn.getBlockZ()).getBlock().setType(Material.WOOL);
-            for(int j = 1; j <= 5; j++){
-                new Location(spawn.getWorld(), spawn.getBlockX()+1, spawn.getBlockY()-1, spawn.getBlockZ()).getBlock().setType(Material.WOOD);
+            for(int j = 1; j <= 4; j++){
+                new Location(spawn.getWorld(), spawn.getBlockX()-j, spawn.getBlockY()-1, spawn.getBlockZ()).getBlock().setType(Material.WOOD);
             }
-            spawn.add(0,1,0).getBlock().setType(Material.FENCE_GATE);
+            Block b = new Location(spawn.getWorld(), spawn.getBlockX()-5, spawn.getBlockY(), spawn.getBlockZ()).getBlock();
+            b.setTypeIdAndData(107, (byte) 1, false);
+            b = new Location(spawn.getWorld(), spawn.getBlockX()-5, spawn.getBlockY()-1, spawn.getBlockZ()).getBlock();
+            b.setTypeIdAndData(35, (byte) 14, false);
+            new Location(spawn.getWorld(), spawn.getBlockX()-5, spawn.getBlockY(), spawn.getBlockZ()-1).getBlock().setType(Material.FENCE);
         }
     }
 }
