@@ -39,6 +39,8 @@ public class Room {
     }
 
     public void start(){
+        currentPNJ.clear();
+        toRemove.clear();
         generateRoom();
         setupScoreboard();
         playerAttached.teleport(spawnPoint);
@@ -49,10 +51,10 @@ public class Room {
         objective = scoreboard.registerNewObjective("minigame", "dummy");
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
         objective.setDisplayName(ChatColor.AQUA+"SamaTest");
-        Score score = objective.getScore(ChatColor.GOLD +"Score");
-        score.setScore(0);
-        Score errors = objective.getScore(ChatColor.RED +"Erreurs");
-        errors.setScore(0);
+        Score scoreObj = objective.getScore(ChatColor.GOLD +"Score");
+        scoreObj.setScore(0);
+        Score errorsObj = objective.getScore(ChatColor.RED +"Erreurs");
+        errorsObj.setScore(0);
         playerAttached.setScoreboard(scoreboard);
     }
 
@@ -80,25 +82,36 @@ public class Room {
         currentPNJ.add(pnj);
     }
 
-    public void removePNJ(PNJ pnj){
-        currentPNJ.remove(pnj);
-    }
-
     public void scorePoint(int points){
         score += points;
-        Score score = objective.getScore(ChatColor.GOLD +"Score");
-        score.setScore(this.score);
+        Score scoreObj = objective.getScore(ChatColor.GOLD +"Score");
+        scoreObj.setScore(this.score);
     }
 
     public void scoreError(){
-        errors++;
-        Score errors = objective.getScore(ChatColor.RED +"Erreurs");
-        errors.setScore(this.errors);
+        errors+=1;
+        Score errorsObj = objective.getScore(ChatColor.RED +"Erreurs");
+        errorsObj.setScore(this.errors);
 
     }
 
-    public void lose(){
+    public void lose(Main plugin){
         playerAttached.sendMessage(ChatColor.RED+"Vous avez perdu !");
-        // TODO: Waiting Room
+        destroy(plugin);
+    }
+
+    public void destroy(Main plugin){
+        plugin.waitingList.add(playerAttached);
+        for(PNJ pnj : currentPNJ)
+            pnj.die();
+        currentPNJ.clear();
+        for(PNJ pnj : toRemove)
+            pnj.die();
+        toRemove.clear();
+        if(playerAttached != null) // dans les cas où on détruit la salle après qu'il ai déjà perdu
+            playerAttached.teleport(plugin.waitingRoom);
+        playerAttached = null;
+        errors = 0;
+        score = 0;
     }
 }

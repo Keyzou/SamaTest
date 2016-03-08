@@ -3,9 +3,6 @@ package com.github.keyzou.samatest;
 import net.minecraft.server.v1_8_R3.PathfinderGoal;
 import org.bukkit.Location;
 
-/**
- * Created by Dean on 06/03/2016.
- */
 public class PathfinderGoalWalk extends PathfinderGoal {
 
     private Location objective;
@@ -28,7 +25,13 @@ public class PathfinderGoalWalk extends PathfinderGoal {
 
     @Override
     public boolean b() {
-        return !this.pnj.getNavigation().m();
+        return false;
     }
+
+    @Override
+    public void e(){
+        pnj.life++;
+    }
+
 
 }
