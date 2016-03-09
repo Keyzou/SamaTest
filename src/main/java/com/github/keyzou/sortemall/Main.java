@@ -1,17 +1,15 @@
-package com.github.keyzou.samatest;
+package com.github.keyzou.sortemall;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.EntityInsentient;
 import net.minecraft.server.v1_8_R3.EntityTypes;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scoreboard.Scoreboard;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -23,78 +21,79 @@ import java.util.logging.Level;
 
 public class Main extends JavaPlugin implements Listener {
 
-    public static final Main instance = new Main();
-
+    /**
+     * Liste des salles (toutes les salles, à ne pas confondre avec roomsPlaying: les salles où un joueur joue)
+     */
     private List<Room> rooms = new ArrayList<Room>();
+    /**
+     * Liste des joueurs en attente
+     */
     protected List<Player> waitingList = new ArrayList<Player>();
+    /**
+     * Emplacement de la salle d'attente
+     */
     protected Location waitingRoom;
-    protected boolean stop = true;
-    protected Scoreboard scoreboard;
+    /**
+     * Si le jeu doit être arrêté ou pas
+     */
+    protected boolean stop;
+    /**
+     * Compte à rebours utilisé pour le début et la fin du jeu
+     */
     private int countdown = 5;
+    /**
+     * ID du Runnable qui effectue le compte à rebours
+     */
     private int countdownID;
 
-
+    /**
+     * Fréquence d'apparition des villageois (en ticks, 20 ticks = 1 seconde)
+     */
     protected long spawnFrequency = 40L;
+    /**
+     * Liste des salles où un joueur est entrain de jouer
+     */
     protected List<Room> roomsPlaying = new ArrayList<Room>();
+    /**
+     * Matrice permettant d'associer un score à un joueur
+     */
     protected Map<String, Integer> scores = new HashMap<String, Integer>();
+    /**
+     * Temps écoulé depuis le début de la partie (en secondes). Utilisé lorsqu'un joueur perd la partie.
+     */
     protected int time = 0;
 
+    /**
+     * Pour pas que SolarLint nous fasse un caca nerveux
+     */
+    private String worldName = "world";
 
     @Override
     public void onEnable() {
-        getServer().getPluginManager().registerEvents(this, this);
-        registerEntity("CustomVillager", 120, PNJ.class);
+        getServer().getPluginManager().registerEvents(this, this); // On a qu'un seul event à gérer donc on le fait dans cette classe
+        registerEntity("CustomVillager", 120, PNJ.class); // On enregistre notre villageois spécial
+        this.waitingRoom = new Location(getServer().getWorld(worldName), 0, getServer().getWorld(worldName).getHighestBlockYAt(0,0), 0);
     }
 
-    @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (!(sender instanceof Player)) {
-            getLogger().warning("Seulement des joueurs peuvent utiliser les commandes !");
-            return false;
+    /**
+     * Méthode qui va initialiser les salles, affecter les joueurs aux salles puis enfin lancer la partie au bout de 5 secondes
+     */
+    private void startGame(){
+        for(int i = 0;i <waitingList.size();i++){
+            rooms.add(new Room(new Location(getServer().getWorld(worldName), 20*i, getServer().getWorld(worldName).getHighestBlockYAt(10*rooms.size(), 20), 20)));
         }
-        if ("st".equalsIgnoreCase(cmd.getName())) {
-            Player p = (Player) sender;
-            return processCommand(p, args[0]);
-        }
-        return false;
-    }
-
-    public boolean processCommand(Player p, String arg) {
-        if ("addRoom".equalsIgnoreCase(arg)) {
-            rooms.add(new Room(p.getLocation()));
-            p.sendMessage(ChatColor.GREEN + "La salle a été créée avec succès !");
-            return true;
-        }
-        if ("start".equalsIgnoreCase(arg)) {
-            return processStartCommand();
-        }
-        if ("addWaiting".equalsIgnoreCase(arg)) {
-            waitingRoom = p.getLocation();
-            p.sendMessage(ChatColor.GREEN + "La salle d'attente a été créée avec succès !");
-            return true;
-        }
-        if ("stop".equalsIgnoreCase(arg)) {
-            p.sendMessage(ChatColor.RED + "Stop !!");
-            for (Room r : rooms) {
-                waitingList.add(r.playerAttached);
-                r.playerAttached = null;
-                clearPNJ(r.currentPNJ);
-                clearPNJ(r.toRemove);
-                stop = true;
-            }
-            return true;
-        }
-        return false;
-    }
-
-    private boolean processStartCommand(){
-        for (int i = 0; i < rooms.size() && i < waitingList.size(); i++) {
+        List<Player> toRemove = new ArrayList<Player>(); // on stocke les joueurs qui vont jouer
+        for (int i = 0; i < rooms.size(); i++) { // la boucle s'arrête s'il y a plus de salle à traiter ou alors plus de joueurs
+            if(i >= waitingList.size())
+                continue;
             Room r = rooms.get(i);
             r.attachPlayer(waitingList.get(i));
             r.start();
-            waitingList.remove(i);
+            toRemove.add(waitingList.get(i));
         }
+        waitingList.removeAll(toRemove); // on retire de la file tous les joueurs qui joue
         countdown = 5;
+        // Création d'un tâche pour faire le compte à rebours
         countdownID = this.getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 
             public void run() {
@@ -108,16 +107,22 @@ public class Main extends JavaPlugin implements Listener {
                     countdown--;
                 }
             }
-        }, 0L, 20L);// 60 L == 3 sec, 20 ticks == 1 sec
-        return true;
+        }, 0L, 20L);// 20 ticks == 1 sec
     }
 
-    private void clearPNJ(List<PNJ> list){
+    /**
+     * Petite fonction permettant de tuer les PNJ d'une liste puis de la vider
+     * @param list Liste de PNJ
+     */
+    public void clearPNJ(List<PNJ> list){
         for (PNJ pnj : list)
             pnj.die();
         list.clear();
     }
 
+    /**
+     * Fonction qui lance les différentes tâches qui vont faire fonctionner le jeu
+     */
     private void runGame(){
         roomsPlaying.addAll(rooms);
         time = 0;
@@ -132,6 +137,9 @@ public class Main extends JavaPlugin implements Listener {
 
     }
 
+    /**
+     * Permet d'arrêter le jeu, puis d'éteindre le serveur après 5 secondes
+     */
     public void endGame(){
         Map.Entry<String,Integer> maxEntry = null;
 
@@ -161,6 +169,15 @@ public class Main extends JavaPlugin implements Listener {
         }, 0L, 20L);// 60 L == 3 sec, 20 ticks == 1 sec
     }
 
+    /**
+     * Fonction permettant d'enregistrer une entité customisée dans le coeur du serveur par le biais de la reflection
+     * Cette fonction a été prise d'un tutoriel sur NMS et les entités:
+     * https://www.spigotmc.org/threads/tutorial-register-and-use-nms-entities-1-8.77607/
+     * Concernant l'ID de l'entité, on a juste un villageois avec une AI simple, donc on lui attribue l'ID d'un villageois classique.
+     * @param name Nom de l'entité
+     * @param id ID de l'entité
+     * @param customClass Classe de l'entité custom
+     */
     public void registerEntity(String name, int id, Class<? extends EntityInsentient> customClass){
 
         try {
@@ -181,7 +198,7 @@ public class Main extends JavaPlugin implements Listener {
         method.setAccessible(true);
          method.invoke(null, customClass, name, id);
         } catch (Exception e){
-            instance.getLogger().log(Level.SEVERE, "Erreur !", e);
+            Bukkit.getLogger().log(Level.SEVERE, "Erreur !", e);
         }
 
 
@@ -189,7 +206,11 @@ public class Main extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e){
-        e.getPlayer().setGameMode(GameMode.ADVENTURE);
-        waitingList.add(e.getPlayer());
+        e.getPlayer().setGameMode(GameMode.ADVENTURE); // ça serait bête qu'il casse des blocs #TravailEnMoins
+        e.getPlayer().sendMessage(ChatColor.BLUE+"Vous avez été placé dans la file d'attente. Dès qu'il y aura suffisament de joueurs, le jeu se lancera automatiquement");
+        waitingList.add(e.getPlayer()); // On met le joueur dans la file d'attente
+        e.getPlayer().teleport(waitingRoom);
+        if(waitingList.size() > 1)
+            startGame();
     }
 }
