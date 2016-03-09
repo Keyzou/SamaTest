@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.github.keyzou</groupId>
-    <artifactId>samatest</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <artifactId>sortemall</artifactId>
+    <version>1.0</version>
 
     <repositories>
         <repository>
@@ -29,7 +29,13 @@
             <version>1.8.8-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>craftbukkit</artifactId>
+            <version>LATEST</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/spigot-1.8.8.jar</systemPath>
+        </dependency>
     </dependencies>
-
 
 </project>

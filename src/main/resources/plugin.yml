@@ -1,0 +1,4 @@
+name: SortEmAll
+description: Plugin effectue par Keyzou pour le test de SamaGames
+main: com.github.keyzou.sortemall.Main
+version: 1.0
