@@ -1,5 +1,7 @@
-package com.github.keyzou.sortemall;
+package com.github.keyzou.sortemall.api;
 
+import com.github.keyzou.sortemall.Main;
+import com.github.keyzou.sortemall.api.entities.PNJ;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -18,11 +20,11 @@ public class Room {
     /**
      * Le score du joueur
      */
-    protected int score;
+    private int score;
     /**
      * Le nombre d'erreurs du joueur
      */
-    protected int errors;
+    private int errors;
 
     /**
      * Le tableau de score que l'on peut voir dans le jeu
@@ -40,24 +42,24 @@ public class Room {
     /**
      * Joueur associé à la salle
      */
-    protected Player playerAttached;
+    private Player playerAttached;
     /**
      * Liste contenant les emplacements de spawn des PNJ
      */
-    protected List<Location> villagerSpawns = new ArrayList<Location>();
+    private List<Location> villagerSpawns = new ArrayList<Location>();
     /**
      * Liste contenant l'emplacement des portillons
      */
-    protected List<Location> fencesLocations = new ArrayList<Location>();
+    private List<Location> fencesLocations = new ArrayList<Location>();
 
     /**
      * Liste des PNJ villageois qui sont dans le jeu
      */
-    protected List<PNJ> currentPNJ = new ArrayList<PNJ>();
+    private List<PNJ> currentPNJ = new ArrayList<PNJ>();
     /**
      * Liste des PNJ à retirer dès que possible
      */
-    protected List<PNJ> toRemove = new ArrayList<PNJ>();
+    private List<PNJ> toRemove = new ArrayList<PNJ>();
 
     public Room(Location spawnPoint){
         this.spawnPoint = spawnPoint;
@@ -155,13 +157,45 @@ public class Room {
      * @param plugin Le plugin
      */
     public void destroy(Main plugin){
-        plugin.waitingList.add(playerAttached);
+        plugin.getWaitingList().add(playerAttached);
         plugin.clearPNJ(currentPNJ);
         plugin.clearPNJ(toRemove);
         if(playerAttached != null) // dans les cas où on détruit la salle après qu'il ai déjà perdu
-            playerAttached.teleport(plugin.waitingRoom);
+            playerAttached.teleport(plugin.getWaitingRoom());
         playerAttached = null;
         errors = 0;
         score = 0;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public int getErrors() {
+        return errors;
+    }
+
+    public Location getSpawnPoint() {
+        return spawnPoint;
+    }
+
+    public Player getPlayerAttached() {
+        return playerAttached;
+    }
+
+    public List<Location> getVillagerSpawns() {
+        return villagerSpawns;
+    }
+
+    public List<Location> getFencesLocations() {
+        return fencesLocations;
+    }
+
+    public List<PNJ> getCurrentPNJ() {
+        return currentPNJ;
+    }
+
+    public List<PNJ> getToRemove() {
+        return toRemove;
     }
 }

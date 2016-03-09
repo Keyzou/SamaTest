@@ -1,4 +1,9 @@
 package com.github.keyzou.sortemall;
+import com.github.keyzou.sortemall.api.entities.PNJ;
+import com.github.keyzou.sortemall.api.Room;
+import com.github.keyzou.sortemall.runnable.GameTask;
+import com.github.keyzou.sortemall.runnable.SpawnTask;
+import com.github.keyzou.sortemall.runnable.VerificationTask;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.EntityInsentient;
 import net.minecraft.server.v1_8_R3.EntityTypes;
@@ -28,15 +33,16 @@ public class Main extends JavaPlugin implements Listener {
     /**
      * Liste des joueurs en attente
      */
-    protected List<Player> waitingList = new ArrayList<Player>();
+    private List<Player> waitingList = new ArrayList<Player>();
     /**
      * Emplacement de la salle d'attente
      */
-    protected Location waitingRoom;
+    private Location waitingRoom;
+
     /**
      * Si le jeu doit être arrêté ou pas
      */
-    protected boolean stop;
+    private boolean stop;
     /**
      * Compte à rebours utilisé pour le début et la fin du jeu
      */
@@ -49,19 +55,19 @@ public class Main extends JavaPlugin implements Listener {
     /**
      * Fréquence d'apparition des villageois (en ticks, 20 ticks = 1 seconde)
      */
-    protected long spawnFrequency = 40L;
+    private long spawnFrequency = 40L;
     /**
      * Liste des salles où un joueur est entrain de jouer
      */
-    protected List<Room> roomsPlaying = new ArrayList<Room>();
+    private List<Room> roomsPlaying = new ArrayList<Room>();
     /**
      * Matrice permettant d'associer un score à un joueur
      */
-    protected Map<String, Integer> scores = new HashMap<String, Integer>();
+    private Map<String, Integer> scores = new HashMap<String, Integer>();
     /**
      * Temps écoulé depuis le début de la partie (en secondes). Utilisé lorsqu'un joueur perd la partie.
      */
-    protected int time = 0;
+    private int time = 0;
 
     /**
      * Pour pas que SolarLint nous fasse un caca nerveux
@@ -212,5 +218,94 @@ public class Main extends JavaPlugin implements Listener {
         e.getPlayer().teleport(waitingRoom);
         if(waitingList.size() > 1)
             startGame();
+    }
+    /**
+     * Pour pouvoir accéder aux salles de l'extérieur
+     * @return Les salles
+     */
+    public List<Room> getRooms() {
+        return rooms;
+    }
+
+    /**
+     * Pour pouvoir accéder aux salles de l'extérieur
+     * @return Les salles
+     */
+    public List<Player> getWaitingList() {
+        return waitingList;
+    }
+
+    /**
+     * Pour pouvoir accéder aux salles de l'extérieur
+     * @return Les salles
+     */
+    public boolean mustStop() {
+        return stop;
+    }
+
+    /**
+     * Renvoie l'emplacement de la salle d'attente
+     * @return emplacement de la salle d'attente
+     */
+    public Location getWaitingRoom() {
+        return waitingRoom;
+    }
+
+    /**
+     * Permet d'arrêter le jeu au prochain tick ou pas
+     * @param stop true si le jeu doit s'arrêter false sinon
+     */
+    public void setStop(boolean stop) {
+        this.stop = stop;
+    }
+
+    /**
+     * Pour pouvoir accéder aux salles de l'extérieur
+     * @return Les salles
+     */
+    public List<Room> getRoomsPlaying() {
+        return roomsPlaying;
+    }
+
+    /**
+     * Pour pouvoir accéder aux salles de l'extérieur
+     * @return Les salles
+     */
+    public Map<String, Integer> getScores() {
+        return scores;
+    }
+
+    /**
+     * Pour pouvoir accéder aux salles de l'extérieur
+     * @return Les salles
+     */
+    public int getTime() {
+        return time;
+    }
+
+    /**
+     * Permet d'incrémenter le temps (en général de 1 seconde)
+     * @param nb augmenter de combien ?
+     */
+    public void addTime(int nb){
+        time += nb;
+    }
+
+    /**
+     * Pour pouvoir accéder aux salles de l'extérieur
+     * @return Les salles
+     */
+    public long getSpawnFrequency() {
+        return spawnFrequency;
+    }
+
+    /**
+     * Réduit le taux de spawn par le nombre entré en paramètre
+     * @param amount réduire de combien ?
+     */
+    public void reduceSpawnFrequency(int amount){
+        this.spawnFrequency -= amount;
+        if(spawnFrequency < 20)
+            spawnFrequency = 20;
     }
 }

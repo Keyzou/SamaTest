@@ -1,5 +1,6 @@
-package com.github.keyzou.sortemall;
+package com.github.keyzou.sortemall.api.entities;
 
+import com.github.keyzou.sortemall.api.ai.PathfinderGoalWalk;
 import net.minecraft.server.v1_8_R3.EntityVillager;
 import net.minecraft.server.v1_8_R3.PathfinderGoalSelector;
 import net.minecraft.server.v1_8_R3.World;
@@ -16,15 +17,15 @@ public class PNJ extends EntityVillager {
     /**
      * La destination du PNJ
      */
-    protected Location objective;
+    private Location objective;
     /**
      * Pour savoir si c'est un bon ou un mauvais PNJ
      */
-    protected boolean good;
+    private boolean good;
     /**
      * Nombre de ticks pendant lequel le PNJ a vécu
      */
-    protected int life;
+    private int life;
 
     public PNJ(World world, Location obj, boolean good) {
         super(world);
@@ -49,4 +50,35 @@ public class PNJ extends EntityVillager {
         this.goalSelector.a(0, new PathfinderGoalWalk(this, objective)); // On rend notre PNJ intelligent
     }
 
+    /**
+     * Permet de récupérer la destination du PNJ
+     * @return la destination du pnj
+     */
+    public Location getObjective() {
+        return objective;
+    }
+
+    /**
+     * Permet de récupérer le nombre de ticks durant lequel le PNJ a vécu
+     * @return la "vie" du pnj
+     */
+    public int getLife() {
+        return life;
+    }
+
+    /**
+     * Permet de savoir si un pnj est bon ou mauvais
+     * @return true si bon sinon false
+     */
+    public boolean isGood() {
+        return good;
+    }
+
+    /**
+     * Ajoute de la "vie" au PNJ (s'incrémente de 1 à chaque tick)
+     * @param life la vie à ajouter
+     */
+    public void addLife(int life) {
+        this.life += life;
+    }
 }
