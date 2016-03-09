@@ -1,5 +1,6 @@
-package com.github.keyzou.sortemall;
+package com.github.keyzou.sortemall.api.ai;
 
+import com.github.keyzou.sortemall.api.entities.PNJ;
 import net.minecraft.server.v1_8_R3.PathfinderGoal;
 import org.bukkit.Location;
 
@@ -50,7 +51,7 @@ public class PathfinderGoalWalk extends PathfinderGoal {
      */
     @Override
     public void e(){
-        pnj.life++;
+        pnj.addLife(1);
     }
 
 
